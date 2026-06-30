@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator - Project Showcase</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(145deg, #1a1a2e, #16213e);
+      padding: 20px;
+    }
+
+    .calculator-wrapper {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 30px;
+      padding: 30px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .display {
+      background: #0f0f1a;
+      border-radius: 20px;
+      padding: 20px 25px;
+      margin-bottom: 25px;
+      text-align: right;
+      box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.6);
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .display .expression {
+      font-size: 14px;
+      color: #8892b0;
+      min-height: 24px;
+      word-break: break-all;
+      margin-bottom: 5px;
+    }
+
+    .display .result {
+      font-size: 48px;
+      font-weight: 600;
+      color: #ccd6f6;
+      line-height: 1.2;
+      overflow-x: auto;
+      white-space: nowrap;
+      transition: color 0.3s;
+    }
+
+    .display .result.error {
+      color: #ff6b6b;
+      font-size: 28px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .btn {
+      background: #1a1a2e;
+      border: none;
+      border-radius: 16px;
+      padding: 18px 0;
+      font-size: 22px;
+      font-weight: 500;
+      color: #ccd6f6;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #0a0a15, 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: all 0.08s ease;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 0px 0 #0a0a15;
+    }
+
+    .btn:hover {
+      background: #222244;
+    }
+
+    .btn.operator {
+      background: #1e2d4a;
+      color: #64ffda;
+      font-size: 24px;
+    }
+
+    .btn.operator:hover {
+      background: #2a3d5e;
+    }
+
+    .btn.equal {
+      background: #64ffda;
+      color: #0a0a15;
+      box-shadow: 0 4px 0 #1a8a7a, 0 4px 15px rgba(100, 255, 218, 0.2);
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .btn.equal:hover {
+      background: #7fffe6;
+    }
+
+    .btn.equal:active {
+      box-shadow: 0 0px 0 #1a8a7a;
+    }
+
+    .btn.clear {
+      background: #2d1b1b;
+      color: #ff6b6b;
+      box-shadow: 0 4px 0 #1a0a0a;
+    }
+
+    .btn.clear:hover {
+      background: #3d2525;
+    }
+
+    .btn.zero {
+      grid-column: span 2;
+    }
+
+    .btn.fn {
+      background: #15152a;
+      color: #8892b0;
+      font-size: 18px;
+    }
+
+    .btn.fn:hover {
+      background: #1f1f3a;
+    }
+
+    @media (max-width: 480px) {
+      .calculator-wrapper {
+        padding: 20px;
+        border-radius: 20px;
+      }
+      
+      .btn {
+        padding: 14px 0;
+        font-size: 18px;
+        border-radius: 12px;
+      }
+      
+      .display .result {
+        font-size: 36px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator-wrapper">
+    <div class="display">
+      <div class="expression" id="expressionDisplay"></div>
+      <div class="result" id="resultDisplay">0</div>
+    </div>
+
+    <div class="buttons">
+      <button class="btn clear" data-value="clear">AC</button>
+      <button class="btn fn" data-value="sign">±</button>
+      <button class="btn fn" data-value="percent">%</button>
+      <button class="btn operator" data-value="÷">÷</button>
+
+      <button class="btn" data-value="7">7</button>
+      <button class="btn" data-value="8">8</button>
+      <button class="btn" data-value="9">9</button>
+      <button class="btn operator" data-value="×">×</button>
+
+      <button class="btn" data-value="4">4</button>
+      <button class="btn" data-value="5">5</button>
+      <button class="btn" data-value="6">6</button>
+      <button class="btn operator" data-value="-">−</button>
+
+      <button class="btn" data-value="1">1</button>
+      <button class="btn" data-value="2">2</button>
+      <button class="btn" data-value="3">3</button>
+      <button class="btn operator" data-value="+">+</button>
+
+      <button class="btn zero" data-value="0">0</button>
+      <button class="btn" data-value=".">.</button>
+      <button class="btn equal" data-value="=">=</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const resultDisplay = document.getElementById('resultDisplay');
+      const expressionDisplay = document.getElementById('expressionDisplay');
+
+      let currentInput = '0';
+      let previousInput = '';
+      let operator = null;
+      let shouldResetInput = false;
+      let justEvaluated = false;
+
+      function updateDisplay() {
+        resultDisplay.textContent = currentInput;
+        resultDisplay.classList.remove('error');
+        if (currentInput === 'Error' || currentInput === 'Infinity' || 
+            currentInput === '-Infinity' || currentInput === 'NaN') {
+          resultDisplay.classList.add('error');
+        }
+      }
+
+      function updateExpression() {
+        if (operator && previousInput) {
+          let opSymbol = operator;
+          if (operator === '*') opSymbol = '×';
+          else if (operator === '/') opSymbol = '÷';
+          else if (operator === '-') opSymbol = '−';
+          expressionDisplay.textContent = `${previousInput} ${opSymbol}`;
+        } else if (previousInput && !operator) {
+          expressionDisplay.textContent = previousInput;
+        } else {
+          expressionDisplay.textContent = '';
+        }
+      }
+
+      function resetCalculator() {
+        currentInput = '0';
+        previousInput = '';
+        operator = null;
+        shouldResetInput = false;
+        justEvaluated = false;
+        updateDisplay();
+        updateExpression();
+      }
+
+      function inputNumber(num) {
+        if (justEvaluated) {
+          currentInput = '0';
+          previousInput = '';
+          operator = null;
+          justEvaluated = false;
+          shouldResetInput = false;
+          expressionDisplay.textContent = '';
+        }
+
+        if (shouldResetInput) {
+          currentInput = '0';
+          shouldResetInput = false;
+        }
+
+        if (currentInput === '0' && num !== '.') {
+          currentInput = num;
+        } else {
+          if (num === '.' && currentInput.includes('.')) return;
+          if (currentInput.replace('-', '').replace('.', '').length >= 15) return;
+          currentInput += num;
+        }
+        updateDisplay();
+        updateExpression();
+      }
+
+      function handleOperator(op) {
+        const currentNum = parseFloat(currentInput);
+        if (isNaN(currentNum) && currentInput !== '') {
+          if (currentInput === 'Error' || currentInput === 'Infinity' || 
+              currentInput === '-Infinity' || currentInput === 'NaN') {
+            resetCalculator();
+            return;
+          }
+        }
+
+        if (operator && !shouldResetInput && !justEvaluated) {
+          const prev = parseFloat(previousInput);
+          const curr = parseFloat(currentInput);
+          if (!isNaN(prev) && !isNaN(curr)) {
+            let result = compute(prev, curr, operator);
+            if (result === Infinity || result === -Infinity || isNaN(result)) {
+              currentInput = 'Error';
+              updateDisplay();
+              updateExpression();
+              return;
+            }
+            currentInput = String(result);
+            previousInput = currentInput;
+            updateDisplay();
+          } else {
+            previousInput = currentInput;
+          }
+        } else {
+          previousInput = currentInput;
+        }
+
+        operator = op;
+        shouldResetInput = true;
+        justEvaluated = false;
+        updateExpression();
+      }
+
+      function compute(a, b, op) {
+        switch (op) {
+          case '+': return a + b;
+          case '-': return a - b;
+          case '*': return a * b;
+          case '/': return b !== 0 ? a / b : Infinity;
+          default: return b;
+        }
+      }
+
+      function evaluate() {
+        if (!operator || shouldResetInput) {
+          if (justEvaluated && operator && previousInput) {
+            const prev = parseFloat(previousInput);
+            const curr = parseFloat(currentInput);
+            if (!isNaN(prev) && !isNaN(curr)) {
+              let result = compute(prev, curr, operator);
+              if (result === Infinity || result === -Infinity || isNaN(result)) {
+                currentInput = 'Error';
+                updateDisplay();
+                updateExpression();
+                return;
+              }
+              currentInput = String(result);
+              previousInput = currentInput;
+              updateDisplay();
+              updateExpression();
+              justEvaluated = true;
+              return;
+            }
+          }
+          return;
+        }
+
+        const prev = parseFloat(previousInput);
+        const curr = parseFloat(currentInput);
+        if (isNaN(prev) || isNaN(curr)) {
+          currentInput = 'Error';
+          updateDisplay();
+          updateExpression();
+          return;
+        }
+
+        let result = compute(prev, curr, operator);
+        if (result === Infinity || result === -Infinity || isNaN(result)) {
+          currentInput = 'Error';
+          updateDisplay();
+          updateExpression();
+          return;
+        }
+
+        currentInput = String(result);
+        previousInput = currentInput;
+        justEvaluated = true;
+        shouldResetInput = true;
+        operator = null;
+        updateDisplay();
+        expressionDisplay.textContent = '';
+      }
+
+      function toggleSign() {
+        if (currentInput === '0' || currentInput === 'Error') return;
+        if (currentInput.startsWith('-')) {
+          currentInput = currentInput.slice(1);
+        } else {
+          currentInput = '-' + currentInput;
+        }
+        updateDisplay();
+        updateExpression();
+      }
+
+      function percent() {
+        const num = parseFloat(currentInput);
+        if (isNaN(num) || currentInput === 'Error') return;
+        currentInput = String(num / 100);
+        updateDisplay();
+        updateExpression();
+      }
+
+      // Event listeners
+      document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          const value = this.dataset.value;
+          if (!value) return;
+
+          switch (value) {
+            case 'clear':
+              resetCalculator();
+              break;
+            case 'sign':
+              toggleSign();
+              break;
+            case 'percent':
+              percent();
+              break;
+            case '=':
+              evaluate();
+              break;
+            case '+':
+            case '-':
+            case '×':
+            case '÷': {
+              let op = value;
+              if (op === '×') op = '*';
+              else if (op === '÷') op = '/';
+              handleOperator(op);
+              break;
+            }
+            default:
+              if (value === '.' || !isNaN(value)) {
+                inputNumber(value);
+              }
+              break;
+          }
+        });
+      });
+
+      // Keyboard support
+      document.addEventListener('keydown', function(e) {
+        const key = e.key;
+        if (key >= '0' && key <= '9') {
+          e.preventDefault();
+          inputNumber(key);
+        } else if (key === '.') {
+          e.preventDefault();
+          inputNumber('.');
+        } else if (key === '+') {
+          e.preventDefault();
+          handleOperator('+');
+        } else if (key === '-') {
+          e.preventDefault();
+          handleOperator('-');
+        } else if (key === '*') {
+          e.preventDefault();
+          handleOperator('*');
+        } else if (key === '/') {
+          e.preventDefault();
+          handleOperator('/');
+        } else if (key === 'Enter' || key === '=') {
+          e.preventDefault();
+          evaluate();
+        } else if (key === 'Escape' || key === 'c' || key === 'C') {
+          e.preventDefault();
+          resetCalculator();
+        } else if (key === '%') {
+          e.preventDefault();
+          percent();
+        }
+      });
+
+      resetCalculator();
+    })();
+  </script>
+</body>
+</html>
